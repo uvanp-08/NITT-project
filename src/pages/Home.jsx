@@ -69,9 +69,9 @@ const Home = () => {
         <p>{motivationalQuotes[quoteIndex]}</p>
       </div>
 
-      <div className="card">
-        <h2>Welcome to the Classroom</h2>
-        <p>Start learning with our interactive platform.</p>
+      <div className="welcome-section">
+        <h2>Good Morning, Yuva</h2>
+        <p>Welcome To The Classroom</p>
       </div>
 
       {assignmentsData.map(({ id, name, description, person }) => (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
@@ -19,12 +19,29 @@ import TypingTest from "./pages/Breaktime/TypingTest";
 
 import "./index.css";
 
-
 function App() {
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 1000);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <Router>
-      <div className="main-container">
-        <Sidebar />
+      {isMobile && (
+        <button className="sidebar-toggle-btn" onClick={() => setShowSidebar(!showSidebar)}>
+          ☰
+        </button>
+      )}
+      <div className={`main-container ${isMobile ? "mobile" : ""}`}>
+        {(showSidebar || !isMobile) && (
+          <Sidebar onClose={() => isMobile && setShowSidebar(false)} />
+        )}
         <div className="content-area">
           <Routes>
             <Route path="/" element={<Home />} />

@@ -69,7 +69,7 @@ const Course = () => {
           className="card hide-scroll"
           style={{
             flex: 1,
-            maxHeight: "300px",
+            maxHeight: "350px",
             overflowY: "scroll",
             display: "flex",
             flexDirection: "column",
