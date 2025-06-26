@@ -1,50 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-
-
-const assignmentsData = [
-  {
-    id: 1,
-    name: "Math Assignment",
-    description: "Solve the problems from chapters 3 and 4.",
-    person: "JS",
-    timeAssigned: "2025-06-01 10:00 AM",
-    dueDate: "2025-06-15 11:59 PM",
-    marks: 100,
-    files: ["chapter3.pdf", "chapter4-problems.docx"],
-  },
-  {
-    id: 2,
-    name: "Science Project",
-    description: "Prepare a presentation on renewable energy.",
-    person: "AL",
-    timeAssigned: "2025-06-05 09:00 AM",
-    dueDate: "2025-06-20 11:59 PM",
-    marks: 50,
-    files: [],
-  },
-
-];
 
 const AssignmentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [assignment, setAssignment] = useState(null);
 
-
-  const assignment = assignmentsData.find(
-    (a) => a.id === Number(id)
-  );
+  useEffect(() => {
+    const fetchAssignment = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/assignments/${id}`);
+        const data = await res.json();
+        setAssignment(data);
+      } catch (err) {
+        console.error("Failed to load assignment", err);
+      }
+    };
+    fetchAssignment();
+  }, [id]);
 
   const [uploadFile, setUploadFile] = useState(null);
-
-  if (!assignment) {
-    return (
-      <div className="card">
-        <h2>Assignment Not Found</h2>
-        <Link to="/">Go Back Home</Link>
-      </div>
-    );
-  }
 
   const handleFileChange = (e) => {
     setUploadFile(e.target.files[0]);
@@ -58,8 +33,16 @@ const AssignmentDetail = () => {
     }
     alert(`Uploaded file: ${uploadFile.name}`);
     setUploadFile(null);
-
   };
+
+  if (!assignment) {
+    return (
+      <div className="card">
+        <h2>Assignment Not Found</h2>
+        <Link to="/">Go Back Home</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="card assignment-detail-card">
@@ -68,18 +51,18 @@ const AssignmentDetail = () => {
       </button>
       <h2>{assignment.name}</h2>
       <p><strong>Description:</strong> {assignment.description}</p>
-      <p><strong>Time Assigned:</strong> {assignment.timeAssigned}</p>
-      <p><strong>Due Date:</strong> {assignment.dueDate}</p>
+      <p><strong>Time Assigned:</strong> {assignment.time_assigned}</p>
+      <p><strong>Due Date:</strong> {assignment.due_date}</p>
       <p><strong>Marks:</strong> {assignment.marks}</p>
 
       <div>
         <strong>Attached Files:</strong>
-        {assignment.files.length > 0 ? (
+        {assignment.files && assignment.files.length > 0 ? (
           <ul>
             {assignment.files.map((file, idx) => (
               <li key={idx}>
-                <a href={`#`} target="_blank" rel="noopener noreferrer">
-                  {file}
+                <a href={file} target="_blank" rel="noopener noreferrer">
+                  {file.split("/").pop()}
                 </a>
               </li>
             ))}
@@ -95,7 +78,7 @@ const AssignmentDetail = () => {
           id="fileUpload"
           type="file"
           onChange={handleFileChange}
-          accept=".pdf,.doc,.docx,.txt,.zip"
+          accept=".pdf,.doc,.docx,.txt,.zip,.pptx"
         />
         <button type="submit" className="upload-btn">Submit</button>
       </form>

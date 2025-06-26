@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const motivationalQuotes = [
   "Believe you can and you're halfway there.",
@@ -10,57 +11,65 @@ const motivationalQuotes = [
   "Great things never come from comfort zones.",
 ];
 
-const assignmentsData = [
-  {
-    id: 1,
-    name: "Math Assignment",
-    description: "Solve the problems from chapters 3 and 4.",
-    person: "JS",
-  },
-  {
-    id: 2,
-    name: "Science Project",
-    description: "Prepare a presentation on renewable energy.",
-    person: "AL",
-  },
-  {
-    id: 3,
-    name: "History Essay",
-    description: "Write an essay about World War II causes.",
-    person: "MK",
-  },
-  {
-    id: 4,
-    name: "English Literature",
-    description: "Read and analyze 'To Kill a Mockingbird'.",
-    person: "SR",
-  },
-];
-
 const Home = () => {
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [assignments, setAssignments] = useState([]);
   const [commentInputs, setCommentInputs] = useState({});
   const [comments, setComments] = useState({});
-  const [quoteIndex, setQuoteIndex] = useState(0);
 
+  // Rotate quotes every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setQuoteIndex((prevIndex) => (prevIndex + 1) % motivationalQuotes.length);
+      setQuoteIndex((prev) => (prev + 1) % motivationalQuotes.length);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch assignments and their comments
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/assignments");
+        setAssignments(res.data);
+
+        // Fetch comments for each assignment
+        res.data.forEach(async (assignment) => {
+          const commentRes = await axios.get(`http://localhost:5000/api/comments/${assignment.id}`);
+          setComments((prev) => ({ ...prev, [assignment.id]: commentRes.data }));
+        });
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
+
+    fetchAssignments();
+  }, []);
+
+  // Handle textarea input
   const handleInputChange = (id, value) => {
     setCommentInputs((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmitComment = (id) => {
-    const comment = commentInputs[id]?.trim();
-    if (!comment) return;
-    setComments((prev) => {
-      const prevComments = prev[id] || [];
-      return { ...prev, [id]: [...prevComments, { user: "Yuva", text: comment }] };
-    });
-    setCommentInputs((prev) => ({ ...prev, [id]: "" }));
+  // Submit comment
+  const handleSubmitComment = async (id) => {
+    const text = commentInputs[id]?.trim();
+    if (!text) return;
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/comments", {
+        assignmentId: id,
+        userName: "Yuva",
+        text,
+      });
+
+      setComments((prev) => ({
+        ...prev,
+        [id]: [...(prev[id] || []), res.data],
+      }));
+      setCommentInputs((prev) => ({ ...prev, [id]: "" }));
+    } catch (err) {
+      console.error("Failed to submit comment:", err);
+    }
   };
 
   return (
@@ -74,16 +83,18 @@ const Home = () => {
         <p>Welcome To The Classroom</p>
       </div>
 
-      {assignmentsData.map(({ id, name, description, person }) => (
-        <div
-          key={id}
-          className="card assignment-card"
-          style={{ cursor: "default" }}
-        >
+      {assignments.map(({ id, name, description, person }) => (
+        <div key={id} className="card assignment-card" style={{ cursor: "default" }}>
           <Link
             to={`/assignment/${id}`}
             className="assignment-header clickable-card"
-            style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "flex-start", gap: "15px" }}
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "15px",
+            }}
           >
             <div className="person-icon">{person}</div>
             <div className="assignment-info">
@@ -115,7 +126,8 @@ const Home = () => {
               <ul>
                 {comments[id].map((comment, index) => (
                   <li key={index}>
-                    <strong>{comment.user}: </strong> {comment.text}
+                    <strong>{comment.user_name || comment.user}: </strong>
+                    {comment.text}
                   </li>
                 ))}
               </ul>

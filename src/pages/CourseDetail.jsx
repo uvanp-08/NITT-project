@@ -1,128 +1,81 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaRegUser } from "react-icons/fa";
-
-const subjectDetails = {
-  maths: {
-    subject: "Maths",
-    teacher: "Ms. Priya Sharma",
-    designation: "Senior Mathematics Teacher",
-    lessons: ["Algebra", "Geometry", "Trigonometry", "Statistics"],
-    assignments: [
-      {
-        id: 1,
-        name: "Algebra Worksheet",
-        description: "Solve all equations from exercise 4B.",
-        person: "PS",
-      },
-      {
-        id: 2,
-        name: "Geometry Basics",
-        description: "Draw and label basic shapes with definitions.",
-        person: "PS",
-      },
-    ],
-  },
-  english: {
-    subject: "English",
-    teacher: "Mr. Arjun Mehta",
-    designation: "Language Specialist",
-    lessons: ["Grammar", "Essay Writing", "Comprehension"],
-    assignments: [],
-  },
-  physics: {
-    subject: "Physics",
-    teacher: "Dr. Ravi Kumar",
-    designation: "Head of Physics Department",
-    lessons: ["Kinematics", "Dynamics", "Thermodynamics"],
-    assignments: [
-      {
-        id: 1,
-        name: "Kinematics Problems",
-        description: "Solve problems from chapter 2.",
-        person: "RK",
-      },
-    ],
-  },
-  chemistry: {
-    subject: "Chemistry",
-    teacher: "Ms. Anjali Singh",
-    designation: "Chemistry Teacher",
-    lessons: ["Atomic Structure", "Chemical Reactions", "Organic Chemistry"],
-    assignments: [
-      {
-        id: 1,
-        name: "Chemical Reactions Lab Report",
-        description: "Submit your lab report on chemical reactions.",
-        person: "AS",
-      },
-    ],
-  },
-};
+import axios from "axios";
 
 const CourseDetail = () => {
   const { courseId } = useParams();
-  const data = subjectDetails[courseId.toLowerCase()];
+  const [course, setCourse] = useState(null);
+  const [assignments, setAssignments] = useState([]);
+  const [commentInputs, setCommentInputs] = useState({});
+  const [comments, setComments] = useState({});
 
-  if (!data) {
-    return <div className="card">Subject not found.</div>;
-  }
+  useEffect(() => {
+    axios.get(`/api/courses/${courseId}`)
+      .then(res => {
+        setCourse(res.data.course);
+        setAssignments(res.data.assignments);
+
+        // Fetch comments for each assignment
+        res.data.assignments.forEach(async (assignment) => {
+          const resComment = await axios.get(`/api/comments/${assignment.id}`);
+          setComments(prev => ({ ...prev, [assignment.id]: resComment.data }));
+        });
+      })
+      .catch(err => console.error("API error:", err));
+  }, [courseId]);
+
+  const handleInputChange = (id, value) => {
+    setCommentInputs(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmitComment = async (id) => {
+    const text = commentInputs[id]?.trim();
+    if (!text) return;
+
+    try {
+      const res = await axios.post("/api/comments", {
+        assignmentId: id,
+        userName: "Yuva",
+        text,
+      });
+
+      setComments(prev => ({
+        ...prev,
+        [id]: [...(prev[id] || []), res.data],
+      }));
+
+      setCommentInputs(prev => ({ ...prev, [id]: "" }));
+    } catch (err) {
+      console.error("Failed to submit comment:", err);
+    }
+  };
+
+  if (!course) return <div className="card">Loading...</div>;
 
   return (
     <div>
-      {/* Teacher Card */}
-      <div
-        className="card"
-        style={{
-          display: "flex",
-          gap: "20px",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <FaRegUser
-            style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
-              objectFit: "cover",
-            }}
-          />
+      <div className="card" style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <FaRegUser style={{ width: 80, height: 80, borderRadius: "50%" }} />
           <div>
-            <h2 style={{ margin: "0" }}>{data.subject}</h2>
-            <p style={{ margin: "4px 0", fontWeight: "bold" }}>{data.teacher}</p>
-            <p style={{ margin: "0", fontSize: "14px", color: "#666" }}>
-              {data.designation}
-            </p>
+            <h2>{course.subject}</h2>
+            <p style={{ fontWeight: "bold" }}>{course.teacher}</p>
+            <p style={{ fontSize: 14, color: "#666" }}>{course.designation}</p>
           </div>
         </div>
         <button className="upload-btn">Join Class</button>
       </div>
 
-      {/* Lessons List */}
       <div className="card">
         <h3>Lessons</h3>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "15px",
-            marginTop: "10px",
-          }}
-        >
-          {data.lessons.map((lesson, idx) => (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 15, marginTop: 10 }}>
+          {course.lessons.map((lesson, i) => (
             <Link
-              key={idx}
-              to={`/lesson/${lesson.toLowerCase()}`} // ✅ Dynamic route to lesson
+              key={i}
+              to={`/lesson/${lesson.toLowerCase().replace(/\s+/g, "-")}`}
               className="card clickable-card"
-              style={{
-                flex: "1 1 150px",
-                textAlign: "center",
-                padding: "15px",
-                textDecoration: "none",
-                color: "inherit",
-              }}
+              style={{ flex: "1 1 150px", textAlign: "center" }}
             >
               {lesson}
             </Link>
@@ -130,27 +83,63 @@ const CourseDetail = () => {
         </div>
       </div>
 
-      {/* Assignments Section */}
       <div>
-        <h3 style={{ marginBottom: "10px" }}>Assignments</h3>
-        {data.assignments.length > 0 ? (
-          data.assignments.map((assignment) => (
-            <div key={assignment.id} className="card assignment-card">
-              <div className="assignment-header">
-                <div className="person-icon">{assignment.person}</div>
+        <h3>Assignments</h3>
+        {assignments.length > 0 ? (
+          assignments.map(({ id, name, description, person }) => (
+            <div key={id} className="card assignment-card" style={{ cursor: "default" }}>
+              <Link
+                to={`/assignment/${id}`}
+                className="assignment-header clickable-card"
+                style={{
+                  textDecoration: "none",
+                  color: "inherit",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "15px",
+                }}
+              >
+                <div className="person-icon">{person}</div>
                 <div className="assignment-info">
-                  <h3 className="assignment-name">{assignment.name}</h3>
-                  <p className="assignment-description">
-                    {assignment.description}
-                  </p>
+                  <h3 className="assignment-name">{name}</h3>
+                  <p className="assignment-description">{description}</p>
                 </div>
+              </Link>
+
+              <div className="comment-form" style={{ marginTop: "10px" }}>
+                <textarea
+                  className="comment-input"
+                  placeholder="Write a comment..."
+                  value={commentInputs[id] || ""}
+                  onChange={(e) => handleInputChange(id, e.target.value)}
+                  rows={2}
+                />
+                <button
+                  className="comment-submit-btn"
+                  onClick={() => handleSubmitComment(id)}
+                  disabled={!commentInputs[id]?.trim()}
+                >
+                  Post
+                </button>
               </div>
+
+              {comments[id] && comments[id].length > 0 && (
+                <div className="posted-comments" style={{ marginTop: "15px" }}>
+                  <h4>Comments:</h4>
+                  <ul>
+                    {comments[id].map((comment, index) => (
+                      <li key={index}>
+                        <strong>{comment.user_name || comment.user}: </strong>
+                        {comment.text}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           ))
         ) : (
-          <div className="card" style={{ color: "#777" }}>
-            No assignments posted yet.
-          </div>
+          <div className="card" style={{ color: "#777" }}>No assignments yet.</div>
         )}
       </div>
     </div>
