@@ -1,62 +1,88 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-const lessonContent = {
-  algebra: {
-    videos: ["Algebra Basics", "Linear Equations", "Quadratic Functions"],
-    books: ["Algebra Essentials", "Advanced Algebra Techniques"],
-    tests: ["Algebra Test 1", "Algebra Quiz: Expressions"],
-  },
-  geometry: {
-    videos: ["Triangles", "Circles and Arcs", "3D Shapes"],
-    books: ["Geometry Workbook", "Shapes and Theorems"],
-    tests: ["Geometry Basics Test", "Circle Theorem Quiz"],
-  },
-};
+import axios from "axios";
+import "./LessonDetail.css";
 
 const LessonDetail = () => {
-  const { lessonId } = useParams();
-  const lessonData = lessonContent[lessonId] || {};
+  const { lessonSlug } = useParams();
+  const [lesson, setLesson] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [tests, setTests] = useState([]);
+
+  useEffect(() => {
+    const fetchLesson = async () => {
+      try {
+        const res = await axios.get(`/api/lessons/${lessonSlug}`);
+        setLesson(res.data.lesson);
+        setVideos(res.data.videos);
+        setMaterials(res.data.materials);
+        setTests(res.data.tests);
+      } catch (err) {
+        console.error("Lesson fetch error:", err);
+      }
+    };
+
+    fetchLesson();
+  }, [lessonSlug]);
+
+  if (!lesson) return <div className="card">Loading lesson...</div>;
 
   return (
     <div className="lesson-detail">
-      <h1 className="lesson-title">{lessonId.toUpperCase()}</h1>
+      <h1 className="lesson-title">{lesson.name}</h1>
       <hr className="lesson-line" />
 
-      {lessonData.videos && (
+      {videos.length > 0 && (
         <div className="slide-section">
           <h2>Videos</h2>
           <div className="slide-container horizontal-scroll">
-            {lessonData.videos.map((video, index) => (
-              <div key={index} className="slide-card video-card">
-                {video}
-              </div>
+            {videos.map((video) => (
+              <iframe
+                key={video.id}
+                width="320"
+                height="180"
+                src={video.url}
+                title={video.title}
+                allowFullScreen
+              />
             ))}
           </div>
         </div>
       )}
 
-      {lessonData.books && (
+      {materials.length > 0 && (
         <div className="slide-section">
-          <h2>Books</h2>
+          <h2>Study Materials</h2>
           <div className="slide-container horizontal-scroll">
-            {lessonData.books.map((book, index) => (
-              <div key={index} className="slide-card">
-                {book}
-              </div>
+            {materials.map((mat) => (
+              <a
+                key={mat.id}
+                className="slide-card"
+                href={`/uploads/${mat.file}`}
+                download
+              >
+                📘 {mat.title}
+              </a>
             ))}
           </div>
         </div>
       )}
 
-      {lessonData.tests && (
+      {tests.length > 0 && (
         <div className="slide-section">
           <h2>Tests</h2>
           <div className="slide-container horizontal-scroll">
-            {lessonData.tests.map((test, index) => (
-              <div key={index} className="slide-card">
-                {test}
-              </div>
+            {tests.map((test) => (
+              <a
+                key={test.id}
+                className="slide-card"
+                href={test.link}
+                target="_blank"
+                rel="noreferrer"
+              >
+                📝 {test.title}
+              </a>
             ))}
           </div>
         </div>

@@ -58,6 +58,7 @@ function App() {
             <Route path="/assignment/:id" element={<AssignmentDetail />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
             <Route path="/lesson/:lessonId" element={<LessonDetail />} />
+
           </Routes>
         </div>
       </div>
