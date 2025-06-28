@@ -1,4 +1,3 @@
-// config/db.js
 const { Pool } = require("pg");
 
 const pool = new Pool({
@@ -19,4 +18,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = { connectDB, pool }; // ✅ Export both
+module.exports = { connectDB, pool };

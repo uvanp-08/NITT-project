@@ -24,5 +24,5 @@ module.exports = {
   getLessonBySlug,
   getLessonVideos,
   getLessonMaterials,
-  getLessonTests
+  getLessonTests,
 };

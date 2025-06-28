@@ -10,52 +10,79 @@ const CourseDetail = () => {
   const [commentInputs, setCommentInputs] = useState({});
   const [comments, setComments] = useState({});
 
+  const toSlug = (str) =>
+    str.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+
   useEffect(() => {
-    axios.get(`/api/courses/${courseId}`)
-      .then(res => {
-        setCourse(res.data.course);
-        setAssignments(res.data.assignments);
+    const fetchCourseData = async () => {
+      try {
+        const res = await axios.get(`/api/courses/${courseId}`);
+        const { course, assignments } = res.data;
+        
+
+        setCourse(course);
+        setAssignments(assignments);
 
         // Fetch comments for each assignment
-        res.data.assignments.forEach(async (assignment) => {
-          const resComment = await axios.get(`/api/comments/${assignment.id}`);
-          setComments(prev => ({ ...prev, [assignment.id]: resComment.data }));
+        assignments.forEach(async (assignment) => {
+          try {
+            const resComment = await axios.get(`/api/comments/${assignment.id}`);
+            setComments((prev) => ({
+              ...prev,
+              [assignment.id]: resComment.data,
+            }));
+          } catch (err) {
+            console.error("Error fetching comments for assignment:", assignment.id, err);
+          }
         });
-      })
-      .catch(err => console.error("API error:", err));
+      } catch (err) {
+        console.error("Error fetching course details:", err);
+      }
+    };
+
+    fetchCourseData();
   }, [courseId]);
 
   const handleInputChange = (id, value) => {
-    setCommentInputs(prev => ({ ...prev, [id]: value }));
+    setCommentInputs((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmitComment = async (id) => {
-    const text = commentInputs[id]?.trim();
+  const handleSubmitComment = async (assignmentId) => {
+    const text = commentInputs[assignmentId]?.trim();
     if (!text) return;
 
     try {
       const res = await axios.post("/api/comments", {
-        assignmentId: id,
+        assignmentId,
         userName: "Yuva",
         text,
       });
 
-      setComments(prev => ({
+      setComments((prev) => ({
         ...prev,
-        [id]: [...(prev[id] || []), res.data],
+        [assignmentId]: [...(prev[assignmentId] || []), res.data],
       }));
 
-      setCommentInputs(prev => ({ ...prev, [id]: "" }));
+      setCommentInputs((prev) => ({ ...prev, [assignmentId]: "" }));
     } catch (err) {
       console.error("Failed to submit comment:", err);
     }
   };
 
-  if (!course) return <div className="card">Loading...</div>;
+  if (!course) return <div className="card">Loading course...</div>;
 
   return (
     <div>
-      <div className="card" style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "space-between" }}>
+      {/* Course Header */}
+      <div
+        className="card"
+        style={{
+          display: "flex",
+          gap: 20,
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <FaRegUser style={{ width: 80, height: 80, borderRadius: "50%" }} />
           <div>
@@ -67,27 +94,45 @@ const CourseDetail = () => {
         <button className="upload-btn">Join Class</button>
       </div>
 
+      {/* Lessons */}
       <div className="card">
         <h3>Lessons</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 15, marginTop: 10 }}>
-          {course.lessons.map((lesson, i) => (
-            <Link
-              key={i}
-              to={`/lesson/${lesson.toLowerCase().replace(/\s+/g, "-")}`}
-              className="card clickable-card"
-              style={{ flex: "1 1 150px", textAlign: "center" }}
-            >
-              {lesson}
-            </Link>
-          ))}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 15,
+            marginTop: 10,
+          }}
+        >
+          {Array.isArray(course.lessons) && course.lessons.length > 0 ? (
+            course.lessons.map((lesson, i) => (
+              <Link
+                key={i}
+                to={`/lesson/${toSlug(lesson)}`}
+                className="card clickable-card"
+                style={{ flex: "1 1 150px", textAlign: "center" }}
+              >
+                {lesson}
+              </Link>
+            ))
+          ) : (
+            <div style={{ color: "#888" }}>No lessons available.</div>
+          )}
         </div>
       </div>
 
+      {/* Assignments */}
       <div>
         <h3>Assignments</h3>
         {assignments.length > 0 ? (
           assignments.map(({ id, name, description, person }) => (
-            <div key={id} className="card assignment-card" style={{ cursor: "default" }}>
+            <div
+              key={id}
+              className="card assignment-card"
+              style={{ cursor: "default" }}
+            >
+              {/* Assignment Link */}
               <Link
                 to={`/assignment/${id}`}
                 className="assignment-header clickable-card"
@@ -106,6 +151,7 @@ const CourseDetail = () => {
                 </div>
               </Link>
 
+              {/* Comment Box */}
               <div className="comment-form" style={{ marginTop: "10px" }}>
                 <textarea
                   className="comment-input"
@@ -118,11 +164,16 @@ const CourseDetail = () => {
                   className="comment-submit-btn"
                   onClick={() => handleSubmitComment(id)}
                   disabled={!commentInputs[id]?.trim()}
+                  style={{
+                    opacity: commentInputs[id]?.trim() ? 1 : 0.6,
+                    marginTop: "5px",
+                  }}
                 >
                   Post
                 </button>
               </div>
 
+              {/* Posted Comments */}
               {comments[id] && comments[id].length > 0 && (
                 <div className="posted-comments" style={{ marginTop: "15px" }}>
                   <h4>Comments:</h4>
@@ -139,7 +190,9 @@ const CourseDetail = () => {
             </div>
           ))
         ) : (
-          <div className="card" style={{ color: "#777" }}>No assignments yet.</div>
+          <div className="card" style={{ color: "#777" }}>
+            No assignments yet.
+          </div>
         )}
       </div>
     </div>

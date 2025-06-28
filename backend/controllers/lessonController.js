@@ -1,4 +1,3 @@
-// controllers/lessonController.js
 const {
   getLessonBySlug,
   getLessonVideos,

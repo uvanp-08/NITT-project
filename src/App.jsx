@@ -57,7 +57,7 @@ function App() {
             <Route path="/setting" element={<Setting />} />
             <Route path="/assignment/:id" element={<AssignmentDetail />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
-            <Route path="/lesson/:lessonId" element={<LessonDetail />} />
+            <Route path="/lesson/:lessonSlug" element={<LessonDetail />} />
 
           </Routes>
         </div>
