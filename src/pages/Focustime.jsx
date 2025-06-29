@@ -1,25 +1,35 @@
 import React, { useState, useEffect, useRef } from "react";
 
 function FocusTime() {
-  const FOCUS_DURATION = 25 * 60; // 25 minutes
-  const BREAK_DURATION = 5 * 60; // 5 minutes
+  const FOCUS_DURATION = 25 * 60;
+  const BREAK_DURATION = 5 * 60;
 
   const [seconds, setSeconds] = useState(FOCUS_DURATION);
   const [isActive, setIsActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
-  const [hearts, setHearts] = useState(3); // start with 3 hearts
+  const [hearts, setHearts] = useState(3);
 
   const timerRef = useRef(null);
+  const containerRef = useRef(null);
+
+  const formatTime = (secs) => {
+    const minutes = Math.floor(secs / 60);
+    const seconds = secs % 60;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     if (isActive) {
       timerRef.current = setInterval(() => {
         setSeconds((prev) => prev - 1);
       }, 1000);
-    } else if (!isActive && timerRef.current !== null) {
+    } else {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+
     return () => clearInterval(timerRef.current);
   }, [isActive]);
 
@@ -36,34 +46,63 @@ function FocusTime() {
     }
   }, [seconds, isBreak]);
 
-  const toggleTimer = () => {
-    setIsActive((prev) => !prev);
+  // Switch tab = pause only during focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!isBreak && document.hidden && isActive) {
+        setIsActive(false);
+        reduceHeart();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [isActive, isBreak]);
+
+  // Outside click = pause only during focus
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        isActive &&
+        !isBreak &&
+        containerRef.current &&
+        !containerRef.current.contains(e.target)
+      ) {
+        setIsActive(false);
+        reduceHeart();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isActive, isBreak]);
+
+  useEffect(() => {
+    if (hearts === 0) {
+      setTimeout(() => {
+        setIsBreak(false);
+        setIsActive(true);
+        setHearts(3);
+        setSeconds(FOCUS_DURATION);
+      }, 1000);
+    }
+  }, [hearts]);
+
+  const reduceHeart = () => {
+    if (hearts > 0) setHearts((prev) => prev - 1);
   };
+
+  const toggleTimer = () => setIsActive((prev) => !prev);
 
   const resetTimer = () => {
     setIsActive(false);
     setIsBreak(false);
     setSeconds(FOCUS_DURATION);
-    setHearts(3); // reset hearts to 3
-  };
-
-  // Remove a heart if stopped during break
-  useEffect(() => {
-    if (!isActive && isBreak) {
-      setHearts((prev) => (prev > 0 ? prev - 1 : 0));
-    }
-  }, [isActive, isBreak]);
-
-  const formatTime = (secs) => {
-    const minutes = Math.floor(secs / 60);
-    const seconds = secs % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
+    setHearts(3);
   };
 
   return (
     <div
+      ref={containerRef}
       style={{
         maxWidth: 480,
         margin: "40px auto",
@@ -82,8 +121,8 @@ function FocusTime() {
           textAlign: "left",
         }}
       >
-        <h2 style={{ margin: 0, marginBottom: 10 }}>📚 Get Ready to Focus!</h2>
-        <p style={{ margin: 0, color: "#555" }}>
+        <h2>📚 Get Ready to Focus!</h2>
+        <p style={{ color: "#555" }}>
           "Success is the sum of small efforts repeated day in and day out."
         </p>
       </div>
@@ -99,8 +138,6 @@ function FocusTime() {
           letterSpacing: 5,
           userSelect: "none",
         }}
-        aria-live="polite"
-        aria-atomic="true"
       >
         {formatTime(seconds)}
       </div>
@@ -147,11 +184,9 @@ function FocusTime() {
           userSelect: "none",
           minHeight: 48,
         }}
-        aria-live="polite"
-        aria-atomic="true"
       >
         {[...Array(hearts)].map((_, i) => (
-          <span key={i} role="img" aria-label="Pomodoro completed heart">
+          <span key={i} role="img" aria-label="heart">
             ❤️
           </span>
         ))}

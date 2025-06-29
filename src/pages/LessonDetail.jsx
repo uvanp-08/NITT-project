@@ -18,11 +18,19 @@ const LessonDetail = () => {
 
   const scroll = (ref, direction) => {
     if (!ref.current) return;
-    const scrollAmount = 300;
-    ref.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
+    ref.current.scrollBy({ left: direction === "left" ? -300 : 300, behavior: "smooth" });
+  };
+
+  const recordUsage = async (type, itemId) => {
+    try {
+      await axios.post("/api/usage/record", {
+        lessonId: lesson.id,
+        type,
+        itemId
+      });
+    } catch (err) {
+      console.error("Usage record failed:", err);
+    }
   };
 
   useEffect(() => {
@@ -39,51 +47,86 @@ const LessonDetail = () => {
           setError("Lesson not found.");
         }
       } catch (err) {
-        console.error("Lesson fetch error:", err);
-        setError(`Failed to load lesson details. ${err.response?.data?.message || err.message}`);
+        console.error("Fetch lesson failed:", err);
+        setError("Failed to load lesson.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchLesson();
   }, [lessonSlug]);
 
-  if (loading) return <div className="card">Loading lesson...</div>;
-  if (error) return <div className="card">{error}</div>;
-  if (!lesson) return <div className="card">Lesson not found.</div>;
+  const extractYoutubeId = (url) => {
+    const match = url.match(/(?:youtu\.be\/|v=)([^&]+)/);
+    return match ? match[1] : "";
+  };
 
-  const renderSection = (title, items, ref, icon, isFile = false, isVideo = false) => (
+  const renderSection = (title, items, ref, type, isFile = false) => (
     <div className="slide-section">
       <h2>{title}</h2>
       <div className="slider-wrapper">
         <button className="arrow left" onClick={() => scroll(ref, "left")}>◀</button>
         <div className="slide-container horizontal-scroll" ref={ref}>
-          {items.map((item) => (
-            <a
-              key={item.id}
-              href={isFile ? item.file : item.url || item.link}
-              target="_blank"
-              rel="noreferrer"
-              className={`slide-card ${isVideo ? "video-card" : ""}`}
-            >
-              {icon} {item.title}
-            </a>
-          ))}
+          {items.map(item => {
+            const link = isFile ? `/uploads/${item.file}` : (item.url || item.link);
+
+            if (type === "video") {
+              const videoId = extractYoutubeId(item.url || "");
+              return (
+                <a
+                  key={item.id}
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="slide-card video-thumbnail"
+                  onClick={() => recordUsage(type, item.id)}
+                >
+                  <img
+                    src={`https://img.youtube.com/vi/${videoId}/0.jpg`}
+                    alt={item.title}
+                    style={{
+                      width: "100%",
+                      height: "100px",
+                      borderRadius: "6px",
+                      objectFit: "cover"
+                    }}
+                  />
+                  <span style={{ marginTop: "5px", fontSize: "14px", display: "block", textAlign: "center" }}>
+                    {item.title}
+                  </span>
+                </a>
+              );
+            }
+
+            return (
+              <a
+                key={item.id}
+                href={item.url || item.link || item.file}
+                target="_blank"
+                rel="noreferrer"
+                className="slide-card"
+                onClick={() => recordUsage(type, item.id)}
+              >
+                {item.title}
+              </a>
+            );
+          })}
         </div>
         <button className="arrow right" onClick={() => scroll(ref, "right")}>▶</button>
       </div>
     </div>
   );
 
+  if (loading) return <div className="card">Loading lesson...</div>;
+  if (error) return <div className="card">{error}</div>;
+
   return (
     <>
       <h1 className="lesson-title">{lesson.name}</h1>
       <hr className="lesson-line" />
-
-      {videos.length > 0 && renderSection("▶️ Videos", videos, videoRef, "", false, true)}
-      {materials.length > 0 && renderSection("📘 Study Materials", materials, materialRef, "", true)}
-      {tests.length > 0 && renderSection("📝 Tests", tests, testRef, "")}
+      {videos.length > 0 && renderSection("▶️ Videos", videos, videoRef, "video")}
+      {materials.length > 0 && renderSection("📘 Study Materials", materials, materialRef, "material", true)}
+      {tests.length > 0 && renderSection("📝 Tests", tests, testRef, "test")}
     </>
   );
 };

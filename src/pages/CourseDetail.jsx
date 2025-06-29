@@ -2,6 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaRegUser } from "react-icons/fa";
 import axios from "axios";
+import { Pie } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const CourseDetail = () => {
   const { courseId } = useParams();
@@ -18,7 +27,6 @@ const CourseDetail = () => {
       try {
         const res = await axios.get(`/api/courses/${courseId}`);
         const { course, assignments } = res.data;
-        
 
         setCourse(course);
         setAssignments(assignments);
@@ -69,6 +77,37 @@ const CourseDetail = () => {
     }
   };
 
+  // Dummy pie data (replace with real usage tracking if needed)
+  const videoData = {
+    labels: ["Watched", "Unwatched"],
+    datasets: [
+      {
+        data: [3, 7],
+        backgroundColor: ["#36A2EB", "#E0E0E0"],
+      },
+    ],
+  };
+
+  const materialData = {
+    labels: ["Used", "Not Used"],
+    datasets: [
+      {
+        data: [2, 5],
+        backgroundColor: ["#4BC0C0", "#E0E0E0"],
+      },
+    ],
+  };
+
+  const testData = {
+    labels: ["Taken", "Not Taken"],
+    datasets: [
+      {
+        data: [1, 4],
+        backgroundColor: ["#FF6384", "#E0E0E0"],
+      },
+    ],
+  };
+
   if (!course) return <div className="card">Loading course...</div>;
 
   return (
@@ -92,6 +131,31 @@ const CourseDetail = () => {
           </div>
         </div>
         <button className="upload-btn">Join Class</button>
+      </div>
+
+      {/* Pie Chart Section */}
+      <div
+        className="card"
+        style={{
+          display: "flex",
+          justifyContent: "space-around",
+          gap: "2rem",
+          padding: "1rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ width: 200 }}>
+          <h4 style={{ textAlign: "center" }}>📺 Videos</h4>
+          <Pie data={videoData} />
+        </div>
+        <div style={{ width: 200 }}>
+          <h4 style={{ textAlign: "center" }}>📘 Materials</h4>
+          <Pie data={materialData} />
+        </div>
+        <div style={{ width: 200 }}>
+          <h4 style={{ textAlign: "center" }}>📝 Tests</h4>
+          <Pie data={testData} />
+        </div>
       </div>
 
       {/* Lessons */}
@@ -124,7 +188,7 @@ const CourseDetail = () => {
 
       {/* Assignments */}
       <div>
-        <h3>Assignments</h3>
+        <h3 style={{ padding: "2rem" }}>Assignments</h3>
         {assignments.length > 0 ? (
           assignments.map(({ id, name, description, person }) => (
             <div
@@ -132,13 +196,12 @@ const CourseDetail = () => {
               className="card assignment-card"
               style={{ cursor: "default" }}
             >
-              {/* Assignment Link */}
               <Link
                 to={`/assignment/${id}`}
                 className="assignment-header clickable-card"
                 style={{
                   textDecoration: "none",
-                  color: "inherit",
+                  color: "black",
                   display: "flex",
                   alignItems: "flex-start",
                   gap: "15px",
@@ -151,7 +214,6 @@ const CourseDetail = () => {
                 </div>
               </Link>
 
-              {/* Comment Box */}
               <div className="comment-form" style={{ marginTop: "10px" }}>
                 <textarea
                   className="comment-input"
@@ -173,7 +235,6 @@ const CourseDetail = () => {
                 </button>
               </div>
 
-              {/* Posted Comments */}
               {comments[id] && comments[id].length > 0 && (
                 <div className="posted-comments" style={{ marginTop: "15px" }}>
                   <h4>Comments:</h4>

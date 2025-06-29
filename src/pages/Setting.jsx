@@ -1,52 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Setting.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Setting = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
   const [profile, setProfile] = useState({ name: "", email: "" });
-
+  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setProfile({ ...profile, [name]: value });
+  useEffect(() => {
+    // Simulate fetching user data from backend
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("/api/user/profile");
+        setProfile(res.data);
+        setDarkMode(res.data.darkMode); // assuming this is saved
+      } catch (err) {
+        console.error("Failed to fetch user profile", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleLogout = () => {
+    // Optional: Clear auth tokens or session storage
+    axios.post("/api/user/logout").finally(() => {
+      navigate("/login");
+    });
   };
 
-  const handleSave = () => {
-    alert("Settings saved!");
-    // Add save logic here (e.g. API call)
+  const handleChangePassword = () => {
+    navigate("/change-password");
+  };
+
+  const handleThemeToggle = async () => {
+    setDarkMode((prev) => !prev);
+    try {
+      await axios.put("/api/user/theme", { darkMode: !darkMode });
+    } catch (err) {
+      console.error("Failed to update theme setting", err);
+    }
   };
 
   return (
     <div className="settings-container">
-      <h2>Settings ⚙️</h2>
+      <h2>⚙️ Settings</h2>
 
       <div className="setting-section">
-        <h4>👤 Profile</h4>
-        <label>
-          Name:
-          <input
-            type="text"
-            name="name"
-            value={profile.name}
-            onChange={handleProfileChange}
-          />
-        </label>
-        <label>
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={profile.email}
-            onChange={handleProfileChange}
-          />
-        </label>
-        <label>
-          Profile Picture:
-          <input type="file" accept="image/*" />
-        </label>
+        <h4>👤 Profile Info</h4>
+        <p><strong>Name:</strong> {profile.name}</p>
+        <p><strong>Email:</strong> {profile.email}</p>
       </div>
 
       <div className="setting-section">
@@ -55,31 +59,21 @@ const Setting = () => {
           <input
             type="checkbox"
             checked={darkMode}
-            onChange={() => setDarkMode(!darkMode)}
+            onChange={handleThemeToggle}
           />
           Enable Dark Mode
         </label>
       </div>
 
       <div className="setting-section">
-        <h4>🔔 Notifications</h4>
-        <label>
-          <input
-            type="checkbox"
-            checked={notifications}
-            onChange={() => setNotifications(!notifications)}
-          />
-          Receive Email Notifications
-        </label>
+        <h4>🔐 Account</h4>
+        <button className="account-btn" onClick={handleChangePassword}>
+          Change Password
+        </button>
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
-
-      <div className="setting-section">
-        <h4>🔒 Account</h4>
-        <button className="account-btn">Change Password</button>
-        <button className="delete-btn">Delete Account</button>
-      </div>
-
-      <button className="save-btn" onClick={handleSave}>💾 Save Settings</button>
     </div>
   );
 };

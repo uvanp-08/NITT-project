@@ -10,9 +10,13 @@ import AssignmentDetail from "./pages/AssignmentDetail";
 import CourseDetail from "./pages/CourseDetail";
 import LessonDetail from "./pages/LessonDetail";
 
+
 import TicTacToe from "./pages/BreakTime/TicTacToe";
 import Sudoku from "./pages/BreakTime/sudoku";
 import MemoryGame from "./pages/BreakTime/MemoryGame";
+
+
+
 import QuizMe from "./pages/Breaktime/QuizMe";
 import ReactionTimer from "./pages/Breaktime/ReactionTimer";
 import TypingTest from "./pages/Breaktime/TypingTest";
@@ -50,7 +54,7 @@ function App() {
             <Route path="/Breaktime" element={<Breaktime />} />
             <Route path="/breaktime/tictactoe" element={<TicTacToe />} />
             <Route path="/breaktime/sudoku" element={<Sudoku />} />
-            <Route path="/breaktime/color-match" element={<MemoryGame />} />
+            <Route path="/breaktime/MemoryGame" element={<MemoryGame />} />
             <Route path="/breaktime/quiz-me" element={<QuizMe />} />
             <Route path="/breaktime/reaction-timer" element={<ReactionTimer />} />
             <Route path="/breaktime/typing-test" element={<TypingTest />} />

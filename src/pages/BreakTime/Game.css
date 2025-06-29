@@ -260,3 +260,20 @@ button:hover {
   font-size: 18px;
   color: #444;
 }
+
+.quiz-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #444;
+}
+
+.total-answered {
+  text-align: left;
+}
+
+.correct-answered {
+  text-align: right;
+}
