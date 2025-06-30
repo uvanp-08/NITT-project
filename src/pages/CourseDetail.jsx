@@ -175,7 +175,7 @@ const CourseDetail = () => {
                 key={i}
                 to={`/lesson/${toSlug(lesson)}`}
                 className="card clickable-card"
-                style={{ flex: "1 1 150px", textAlign: "center" }}
+                style={{ flex: "1 1 150px", textAlign: "center", color: "black", textDecoration: "none" }}
               >
                 {lesson}
               </Link>

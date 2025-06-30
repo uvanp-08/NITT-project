@@ -9,22 +9,24 @@ const Setting = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulate fetching user data from backend
     const fetchUser = async () => {
       try {
         const res = await axios.get("/api/user/profile");
         setProfile(res.data);
-        setDarkMode(res.data.darkMode); // assuming this is saved
+        setDarkMode(res.data.darkMode);
       } catch (err) {
         console.error("Failed to fetch user profile", err);
       }
     };
-
     fetchUser();
   }, []);
 
+  // Apply the selected theme to the HTML root
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
   const handleLogout = () => {
-    // Optional: Clear auth tokens or session storage
     axios.post("/api/user/logout").finally(() => {
       navigate("/login");
     });
@@ -35,9 +37,10 @@ const Setting = () => {
   };
 
   const handleThemeToggle = async () => {
-    setDarkMode((prev) => !prev);
+    const newTheme = !darkMode;
+    setDarkMode(newTheme);
     try {
-      await axios.put("/api/user/theme", { darkMode: !darkMode });
+      await axios.put("/api/user/theme", { darkMode: newTheme });
     } catch (err) {
       console.error("Failed to update theme setting", err);
     }
