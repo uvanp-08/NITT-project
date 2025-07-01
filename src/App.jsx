@@ -9,21 +9,21 @@ import Setting from "./pages/Setting";
 import AssignmentDetail from "./pages/AssignmentDetail";
 import CourseDetail from "./pages/CourseDetail";
 import LessonDetail from "./pages/LessonDetail";
-
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import TicTacToe from "./pages/BreakTime/TicTacToe";
 import Sudoku from "./pages/BreakTime/sudoku";
 import MemoryGame from "./pages/BreakTime/MemoryGame";
-
-
-
 import QuizMe from "./pages/Breaktime/QuizMe";
 import ReactionTimer from "./pages/Breaktime/ReactionTimer";
 import TypingTest from "./pages/Breaktime/TypingTest";
 
+import { useAuth } from "./context/AuthContext";
 import "./index.css";
 
 function App() {
+  const { token } = useAuth();
   const [showSidebar, setShowSidebar] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -37,32 +37,32 @@ function App() {
 
   return (
     <Router>
-      {isMobile && (
+      {token && isMobile && (
         <button className="sidebar-toggle-btn" onClick={() => setShowSidebar(!showSidebar)}>
           ☰
         </button>
       )}
       <div className={`main-container ${isMobile ? "mobile" : ""}`}>
-        {(showSidebar || !isMobile) && (
+        {token && (showSidebar || !isMobile) && (
           <Sidebar onClose={() => isMobile && setShowSidebar(false)} />
         )}
         <div className="content-area">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/course" element={<Course />} />
-            <Route path="/FocusTime" element={<FocusTime />} />
-            <Route path="/Breaktime" element={<Breaktime />} />
-            <Route path="/breaktime/tictactoe" element={<TicTacToe />} />
-            <Route path="/breaktime/sudoku" element={<Sudoku />} />
-            <Route path="/breaktime/MemoryGame" element={<MemoryGame />} />
-            <Route path="/breaktime/quiz-me" element={<QuizMe />} />
-            <Route path="/breaktime/reaction-timer" element={<ReactionTimer />} />
-            <Route path="/breaktime/typing-test" element={<TypingTest />} />
-            <Route path="/setting" element={<Setting />} />
-            <Route path="/assignment/:id" element={<AssignmentDetail />} />
-            <Route path="/course/:courseId" element={<CourseDetail />} />
-            <Route path="/lesson/:lessonSlug" element={<LessonDetail />} />
-
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/course" element={<ProtectedRoute><Course /></ProtectedRoute>} />
+            <Route path="/FocusTime" element={<ProtectedRoute><FocusTime /></ProtectedRoute>} />
+            <Route path="/Breaktime" element={<ProtectedRoute><Breaktime /></ProtectedRoute>} />
+            <Route path="/breaktime/tictactoe" element={<ProtectedRoute><TicTacToe /></ProtectedRoute>} />
+            <Route path="/breaktime/sudoku" element={<ProtectedRoute><Sudoku /></ProtectedRoute>} />
+            <Route path="/breaktime/MemoryGame" element={<ProtectedRoute><MemoryGame /></ProtectedRoute>} />
+            <Route path="/breaktime/quiz-me" element={<ProtectedRoute><QuizMe /></ProtectedRoute>} />
+            <Route path="/breaktime/reaction-timer" element={<ProtectedRoute><ReactionTimer /></ProtectedRoute>} />
+            <Route path="/breaktime/typing-test" element={<ProtectedRoute><TypingTest /></ProtectedRoute>} />
+            <Route path="/setting" element={<ProtectedRoute><Setting /></ProtectedRoute>} />
+            <Route path="/assignment/:id" element={<ProtectedRoute><AssignmentDetail /></ProtectedRoute>} />
+            <Route path="/course/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
+            <Route path="/lesson/:lessonSlug" element={<ProtectedRoute><LessonDetail /></ProtectedRoute>} />
           </Routes>
         </div>
       </div>

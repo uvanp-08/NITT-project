@@ -1,7 +1,20 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = ({ onClose }) => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    if (confirmLogout) {
+      logout(); // ✅ updates context
+      navigate("/login");
+      onClose();
+    }
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -14,7 +27,9 @@ const Sidebar = ({ onClose }) => {
         <NavLink to="/FocusTime" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>Focus Time</NavLink>
         <NavLink to="/Breaktime" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>Break Time</NavLink>
         <NavLink to="/setting" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>Settings</NavLink>
-        <a href="#" className="logout" onClick={onClose}>Logout</a>
+        <button onClick={handleLogout} className="logout" >
+          Logout
+        </button>
       </nav>
     </div>
   );

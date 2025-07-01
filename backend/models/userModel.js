@@ -1,32 +1,28 @@
 const { pool } = require("../config/db");
 
-// Function to insert a new user
-const createUser = async (name, email) => {
-  try {
-    console.log("🛠️ Inserting user into DB...");
-    
-    const result = await pool.query(
-      "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *",
-      [name, email]
-    );
-
-    console.log("✅ User inserted:", result.rows[0]);
-    return result.rows[0];
-  } catch (err) {
-    console.error("❌ Error inserting user:", err);
-    throw err; // Rethrow to be handled by controller
-  }
+// Create a new user
+const createUser = async (name, email, password) => {
+  const result = await pool.query(
+    "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
+    [name, email, password]
+  );
+  return result.rows[0];
 };
 
-// Function to fetch all users
+// Get all users
 const getAllUsers = async () => {
-  try {
-    const result = await pool.query("SELECT * FROM users");
-    return result.rows;
-  } catch (err) {
-    console.error("❌ Error fetching users:", err);
-    throw err;
-  }
+  const result = await pool.query("SELECT id, name, email FROM users");
+  return result.rows;
 };
 
-module.exports = { createUser, getAllUsers };
+// Find user by email
+const findUserByEmail = async (email) => {
+  const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  return result.rows[0];
+};
+
+module.exports = {
+  createUser,
+  getAllUsers,
+  findUserByEmail,
+};

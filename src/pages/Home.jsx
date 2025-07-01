@@ -17,6 +17,10 @@ const Home = () => {
   const [commentInputs, setCommentInputs] = useState({});
   const [comments, setComments] = useState({});
 
+  // ✅ Get user name from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userName = user?.name || "Guest";
+
   // Rotate quotes every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -58,7 +62,7 @@ const Home = () => {
     try {
       const res = await axios.post("http://localhost:5000/api/comments", {
         assignmentId: id,
-        userName: "Yuva",
+        userName, // ✅ use actual logged-in name
         text,
       });
 
@@ -79,7 +83,7 @@ const Home = () => {
       </div>
 
       <div className="welcome-section">
-        <h2>Good Morning, Yuva</h2>
+        <h2>Good Morning, {userName}</h2> {/* ✅ dynamically show user name */}
         <p>Welcome To The Classroom</p>
       </div>
 

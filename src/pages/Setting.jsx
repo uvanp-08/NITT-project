@@ -4,21 +4,25 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Setting = () => {
-  const [profile, setProfile] = useState({ name: "", email: "" });
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ Get user info directly from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userName = user?.name || "Guest";
+  const userEmail = user?.email || "";
+
   useEffect(() => {
-    const fetchUser = async () => {
+    // Optional: if you saved darkMode preference in localStorage or DB, load it here
+    const fetchTheme = async () => {
       try {
-        const res = await axios.get("/api/user/profile");
-        setProfile(res.data);
+        const res = await axios.get("/api/user/theme");
         setDarkMode(res.data.darkMode);
       } catch (err) {
-        console.error("Failed to fetch user profile", err);
+        console.error("Failed to fetch theme", err);
       }
     };
-    fetchUser();
+    fetchTheme();
   }, []);
 
   // Apply the selected theme to the HTML root
@@ -28,6 +32,8 @@ const Setting = () => {
 
   const handleLogout = () => {
     axios.post("/api/user/logout").finally(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       navigate("/login");
     });
   };
@@ -52,8 +58,8 @@ const Setting = () => {
 
       <div className="setting-section">
         <h4>👤 Profile Info</h4>
-        <p><strong>Name:</strong> {profile.name}</p>
-        <p><strong>Email:</strong> {profile.email}</p>
+        <p><strong>Name:</strong> {userName}</p>
+        <p><strong>Email:</strong> {userEmail}</p>
       </div>
 
       <div className="setting-section">
@@ -72,9 +78,6 @@ const Setting = () => {
         <h4>🔐 Account</h4>
         <button className="account-btn" onClick={handleChangePassword}>
           Change Password
-        </button>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
         </button>
       </div>
     </div>

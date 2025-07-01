@@ -959,3 +959,7 @@ a:focus {
   border-top-color: var(--accent-primary);
   animation: spin 1s ease-in-out infinite;
 }
+
+.card , hide-scroll {
+  flex: 1; maxHeight: 350; overflowY: "scroll"; display: "flex"; flexDirection: "column"; gap: 10;
+}
