@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { connectDB } = require("./config/db");
+const path = require("path");
 
 const courseRoutes = require("./routes/courseRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
@@ -39,6 +40,14 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/quiz", require("./routes/quiz"));
 app.use("/api/usage", usageRoutes);
 app.use("/api/users", userRoutes); // ✅ ADD THIS LINE
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+// Fallback: serve index.html for any unknown route (for React Router)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Backend listening on port ${PORT}`));
