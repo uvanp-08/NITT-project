@@ -15,7 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import TicTacToe from "./pages/BreakTime/TicTacToe";
 import Sudoku from "./pages/BreakTime/sudoku";
 import MemoryGame from "./pages/BreakTime/MemoryGame";
-import QuizMe from "./pages/BreakTime/quizMe";
+import QuizMe from "./pages/BreakTime/QuizMe";
 import ReactionTimer from "./pages/BreakTime/ReactionTimer";
 import TypingTest from "./pages/BreakTime/TypingTest";
 
