@@ -232,7 +232,6 @@ body {
 /* Content Area */
 .content-area {
   flex: 1;
-  padding: 2rem;
   background: var(--bg-tertiary);
   overflow-y: auto;
 }
