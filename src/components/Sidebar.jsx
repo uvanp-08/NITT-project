@@ -18,7 +18,7 @@ const Sidebar = ({ onClose }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <h1>📘 Classroom</h1>
+        <h1>📘 SmartLearn</h1>
       </div>
 
       <nav>
