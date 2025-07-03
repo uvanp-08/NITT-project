@@ -17,7 +17,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => res.send("API Running"));
+//app.get("/", (req, res) => res.send("API Running"));
 
 app.post('/api/usage', async (req, res) => {
   const { type, itemId, lessonId } = req.body;
