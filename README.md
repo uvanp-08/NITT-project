@@ -32,14 +32,15 @@ An interactive, full-stack educational web application built with **React**, **E
 ---
 
 ## 📁 Project Structure
-/client → React frontend
-├── /pages → Pages like Home, Course, LessonDetail, FocusTime, etc.
-├── /components → Sidebar, ProtectedRoute, DarkModeToggle
-├── /context → AuthContext.js
-└── index.css → Global styling
-
-/backend → Express + PostgreSQL backend
-├── /routes → API endpoints for lessons, courses, assignments, usage, comments
-├── /models → DB queries
-├── db.js → DB connection config
-└── server.js → Main server entry
+/client → React frontend  
+├── /pages → Pages like Home, Course, LessonDetail, FocusTime, etc.  
+├── /components → Sidebar, ProtectedRoute, DarkModeToggle  
+├── /context → AuthContext.js  
+└── index.css → Global styling  
+  
+/backend → Express + PostgreSQL backend  
+├── /routes → API endpoints for lessons, courses, assignments, usage, comments  
+├── /models → DB queries  
+├── db.js → DB connection config  
+└── server.js → Main server entry  
+  
