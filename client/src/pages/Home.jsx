@@ -33,12 +33,12 @@ const Home = () => {
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/assignments");
+        const res = await axios.get("/api/assignments");
         setAssignments(res.data);
 
         // Fetch comments for each assignment
         res.data.forEach(async (assignment) => {
-          const commentRes = await axios.get(`http://localhost:5000/api/comments/${assignment.id}`);
+          const commentRes = await axios.get(`/api/comments/${assignment.id}`);
           setComments((prev) => ({ ...prev, [assignment.id]: commentRes.data }));
         });
       } catch (err) {
@@ -60,7 +60,7 @@ const Home = () => {
     if (!text) return;
 
     try {
-      const res = await axios.post("http://localhost:5000/api/comments", {
+      const res = await axios.post("/api/comments", {
         assignmentId: id,
         userName, // ✅ use actual logged-in name
         text,
