@@ -1,18 +1,19 @@
-# 🎓 NITT Study Platform
+# SMARTLEARN 
+## Digital Learning Platform for Cognitive-Aware Online Education: Enhancing Student Teacher Interaction in Online Platforms
 
 An interactive, full-stack educational web application built with **React**, **Express.js**, and **PostgreSQL** to enhance focused learning, assignment tracking, and lesson engagement — enriched with real-time usage analytics, focus timers, and gamified break-time features.
 
 ## 🚀 Features
 
-- 🔐 **User Authentication** with JWT (login/logout flow)
-- 📚 **Course Modules**: List, explore, and join various subjects
-- 📝 **Assignments**: Submit and comment on subject-wise tasks
-- 🎥 **Lessons**: Videos, materials, and test sections (fully trackable)
-- 📊 **Usage Analytics**: View pie charts of video/material/test usage
-- ⏱ **FocusTime**: Pomodoro-based focus timer with heart penalties for distraction
-- 🕹 **BreakTime**: Brain-refreshing games like Sudoku, Quiz, Tic Tac Toe
-- 🌙 **Dark Mode** toggle support
-- 🎯 Responsive Design for desktop & mobile
+-  **User Authentication** with JWT (login/logout flow)
+-  **Course Modules**: List, explore, and join various subjects
+-  **Assignments**: Submit and comment on subject-wise tasks
+-  **Lessons**: Videos, materials, and test sections (fully trackable)
+-  **Usage Analytics**: View pie charts of video/material/test usage
+-  **FocusTime**: Pomodoro-based focus timer with heart penalties for distraction
+-  **BreakTime**: Brain-refreshing games like Sudoku, Quiz, Tic Tac Toe
+-  **Dark Mode** toggle support
+-  Responsive Design for desktop & mobile
 
 ## 🛠 Tech Stack
 
@@ -44,3 +45,20 @@ An interactive, full-stack educational web application built with **React**, **E
 ├── db.js → DB connection config  
 └── server.js → Main server entry  
   
+## 📦 Prerequisites
+
+- Node.js & npm
+- PostgreSQL
+- Git
+
+## 🌐 Deployment
+This project is deployed on Render. To access the website click -> https://nitt-project-y7h6.onrender.com
+
+## 🔮 Future Enhancements
+
+- 📂 Profile system for users
+- 🔔 Notifications & reminders
+- 💬 Real-time chat within courses
+
+### This project is open-source and free to use for academic purposes.
+### Feel free to fork, contribute, or star ⭐ the repo!
