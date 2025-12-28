@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./breaktime.css";
+import "./Breaktime.css";
 import tictactoeImg from "../../images/tictactoe.png";
 import sudokuImg from "../../images/sudoku.jpg";
 import MemoryImg from "../../images/memorygame.jpg";
